@@ -6,11 +6,11 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { render } from 'react-dom';
 import { DirectionalLight, ObjectLoader } from 'three';
+import ProjectedMaterial from 'three-projected-material'
 
 
-var hlight, directionalLight, light , light2 , light3 , light4 , animate;
+var hlight, directionalLight, light , light2 , light3 , light4 , animate, car, mat, mesh;
 class LoaderMain extends Component {
-
     
   componentDidMount() {
     let scene = new THREE.Scene();
@@ -28,7 +28,7 @@ class LoaderMain extends Component {
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls( camera, renderer.domElement );
-    controls.autoRotate = true;
+    //controls.autoRotate = true;
     controls.update();
 
     hlight = new THREE.AmbientLight(0x404040 , 5);
@@ -56,36 +56,50 @@ class LoaderMain extends Component {
     scene.add(light4);
 */
 
-    var loader = new OBJLoader();
+    //var loader = new OBJLoader();
 
-    //var loader = new GLTFLoader();
-    /*loader.load('scene.gltf' , function(gltf) {
-        console.log("err");
+    var loader = new GLTFLoader();
+    loader.load('armchairYellow.gltf', gltf => {
+        console.log("ok");
+        var texLoader = new THREE.TextureLoader();
+        
         car = gltf.scene.children[0];
         car.scale.set(0.5 , 0.5 ,0.5);
-        scene.add(gltf.scene);
-        
-    })*/
+        car.traverse(obj => {
+            if(obj.isMesh && obj.geometry.index.count == 89016) {
+                texLoader.load("logo192.png", tex => {
+                    mat = new ProjectedMaterial({
+                        camera,
+                        texture : tex,
+                        textureScale: 0.8,
+                       // transparent: true
+                    })
+                    mesh = new THREE.Mesh(obj.geometry, [mat])
+                    scene.add(mesh);
+                    animate();
+                })  
+            }
+        })
+        //scene.add(car);
+    }, undefined ,err => {
+        console.log(err)
+    })
 
-    loader.load( 'FinalBaseMesh.obj', function ( obj ) {
-
+    /*loader.load('FinalBaseMesh.obj', function ( obj ) {
         obj.scale.set(1,1,1);
         scene.add(obj);
-
         animate();
-        
     }, undefined, function ( error ) {
     
         console.error( 'error' );
-        console.error( error );
-
-    
-    } );
+        console.error( error );    
+    });*/
 
     animate = ()=> {
         controls.update();
         renderer.render(scene , camera);
-        requestAnimationFrame(animate)
+        requestAnimationFrame(animate);
+        mat.project(mesh);
     }
   }
 
