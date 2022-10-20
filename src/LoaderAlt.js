@@ -70,7 +70,7 @@ class LoaderMain extends Component {
                 texLoader.load("logo192.png", tex => {
                     mat = new ProjectedMaterial({
                         camera,
-                        texture : tex,
+                        texture: tex,
                         textureScale: 0.8,
                        // transparent: true
                     })
